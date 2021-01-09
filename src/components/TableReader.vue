@@ -8,6 +8,17 @@
             People list
           </v-card-title>
           <v-card-text>
+            <v-row>
+              <v-col cols="12">
+                <v-btn color="pink darken-1" @click="getData" dark>
+                  <v-icon class="mr-1">mdi-refresh</v-icon>
+                  <span>
+                    Refresh values
+                  </span>
+                </v-btn>
+              </v-col>
+              <br>
+            </v-row>
             <v-data-table
               :loading="loading"
               :headers="headers"
@@ -29,7 +40,7 @@
                   <span class="white--text">See Phone numbers</span>
                 </v-tooltip>
               </template>
-              <template v-slot:item.shiporder="">
+              <template v-slot:item.shiporder="{ item }">
                 <v-tooltip bottom color="third">
                   <template v-slot:activator="{ on, attrs }">
                     <a
@@ -91,19 +102,19 @@ export default {
     }
   },
   created () {
-    this.getData();
+    this.getData()
   },
   methods: {
     async getData() {
-      const res = await fetch('http://localhost:8002/api/people');
-      const data = await res.json();
+      this.loading = true
+      const res = await fetch('http://localhost:8002/api/people')
+      const data = await res.json()
       this.data = data;
       this.loading = false
     },
     details (item) {
       this.dialog = true
       this.itemSelected = item
-      console.log(item)
     }
   }
 };

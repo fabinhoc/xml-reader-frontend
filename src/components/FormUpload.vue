@@ -88,7 +88,7 @@ export default {
         this.text = responseShiporder + ' ' + responsePeople
       } else {
         this.color = 'success'
-        this.text = 'Files has been uplodaded!';
+        this.text = 'Files has been uplodaded!'
       }
 
     }, 
