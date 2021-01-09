@@ -24,7 +24,7 @@
                   <v-btn color="success" class="mr-1" @click="sendFile">
                     Upload files
                   </v-btn>
-                  <v-btn color="default">
+                  <v-btn color="default" @click="reset">
                     Cancel
                   </v-btn>
                 </v-form>
@@ -67,16 +67,18 @@ export default {
     }
   },
   methods: {
-    validate () {
-      this.$refs.form.validate()
-    },
     reset () {
       this.$refs.form.reset()
     },
-    resetValidation () {
-      this.$refs.form.resetValidation()
-    },
     async sendFile () {
+
+      if (this.fileShiporder.length === 0 && this.filePeople.length === 0) {
+        this.snackbar = true
+        this.color = 'warning'
+        this.text = 'Please choose a file to upload'
+        return
+      }
+
       const responseShiporder = await this.sendShiporder();
       const responsePeople = await this.sendPeople();
       
