@@ -21,7 +21,7 @@
                     accept="text/xml"
                     label="Choose shiporder XML"
                   />
-                  <v-btn color="success" class="mr-1">
+                  <v-btn color="success" class="mr-1" @click="sendFile">
                     Upload files
                   </v-btn>
                   <v-btn color="default">
@@ -32,6 +32,22 @@
             </v-card>
           </v-col>
       <v-spacer></v-spacer>
+      <v-snackbar
+        v-model="snackbar"
+        :color="color"
+      >
+        {{ text }}
+
+        <template v-slot:action="{ attrs }">
+          <v-btn
+            text
+            v-bind="attrs"
+            @click="snackbar = false"
+          >
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
     </v-row>
   </v-container>
 </template>
@@ -40,11 +56,16 @@
 export default {
   name: "FormUpload",
 
-  data: () => ({
-    valid: true,
-    filePeople: '',
-    fileShiporder: ''
-  }),
+  data () {
+    return {
+      snackbar: false,
+      text: '',
+      color:'',
+      valid: true,
+      filePeople: [],
+      fileShiporder: []
+    }
+  },
   methods: {
     validate () {
       this.$refs.form.validate()
@@ -55,6 +76,56 @@ export default {
     resetValidation () {
       this.$refs.form.resetValidation()
     },
+    async sendFile () {
+      const responseShiporder = await this.sendShiporder();
+      const responsePeople = await this.sendPeople();
+      
+      this.snackbar = true
+      if (responseShiporder !== 'success' || responsePeople !== 'success') {
+        this.color = 'red'
+        this.text = responseShiporder + ' ' + responsePeople
+      } else {
+        this.color = 'success'
+        this.text = 'Files has been uplodaded!';
+      }
+
+    }, 
+    async sendShiporder () {
+      let response = 'success'
+
+      if (this.fileShiporder.length !== 0) {
+
+        let formData = new FormData();
+        formData.append('file', this.fileShiporder);
+
+        let res = await fetch('http://localhost:8002/api/upload/shiporders', {
+          method: 'POST',
+          body: formData,
+        });
+
+        response = await res.json();
+      }
+
+      return response;     
+    },
+    async sendPeople () {
+
+      let response = 'success'
+
+      if (this.filePeople.length !== 0) {
+        let formData = new FormData();
+        formData.append('file', this.filePeople);
+
+        let res = await fetch(`http://localhost:8002/api/upload/people`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        response = await res.json();
+      }
+
+      return response;
+    }
   }
 };
 </script>

@@ -9,121 +9,102 @@
           </v-card-title>
           <v-card-text>
             <v-data-table
+              :loading="loading"
               :headers="headers"
-              :items="desserts"
+              :items="data"
               :items-per-page="5"
               class="elevation-1"
-            ></v-data-table>
+            >
+              <template v-slot:item.phone="{ item }">
+                <v-tooltip bottom color="third">
+                  <template v-slot:activator="{ on, attrs }">
+                    <a
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="details(item)"
+                    >
+                      View phones
+                    </a>
+                  </template>
+                  <span class="white--text">See Phone numbers</span>
+                </v-tooltip>
+              </template>
+              <template v-slot:item.shiporder="">
+                <v-tooltip bottom color="third">
+                  <template v-slot:activator="{ on, attrs }">
+                    <a
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="details(item)"
+                    >
+                      View Shiporders
+                    </a>
+                  </template>
+                  <span class="white--text">See Shiporders</span>
+                </v-tooltip>
+              </template>
+            </v-data-table>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
+    <v-dialog v-model="dialog" width="600">
+      <v-card>
+        <v-card-text>
+          <Detail :data.sync="itemSelected" />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script>
+import Detail from './Detail';
+
 export default {
   name: "TableReader",
-
-  data: () => ({
-    headers: [
-      {
-        text: 'Dessert (100g serving)',
-        align: 'start',
-        sortable: false,
-        value: 'name',
-      },
-      { text: 'Calories', value: 'calories' },
-      { text: 'Fat (g)', value: 'fat' },
-      { text: 'Carbs (g)', value: 'carbs' },
-      { text: 'Protein (g)', value: 'protein' },
-      { text: 'Iron (%)', value: 'iron' },
-    ],
-    desserts: [
-      {
-        name: 'Frozen Yogurt',
-        calories: 159,
-        fat: 6.0,
-        carbs: 24,
-        protein: 4.0,
-        iron: '1%',
-      },
-      {
-        name: 'Ice cream sandwich',
-        calories: 237,
-        fat: 9.0,
-        carbs: 37,
-        protein: 4.3,
-        iron: '1%',
-      },
-      {
-        name: 'Eclair',
-        calories: 262,
-        fat: 16.0,
-        carbs: 23,
-        protein: 6.0,
-        iron: '7%',
-      },
-      {
-        name: 'Cupcake',
-        calories: 305,
-        fat: 3.7,
-        carbs: 67,
-        protein: 4.3,
-        iron: '8%',
-      },
-      {
-        name: 'Gingerbread',
-        calories: 356,
-        fat: 16.0,
-        carbs: 49,
-        protein: 3.9,
-        iron: '16%',
-      },
-      {
-        name: 'Jelly bean',
-        calories: 375,
-        fat: 0.0,
-        carbs: 94,
-        protein: 0.0,
-        iron: '0%',
-      },
-      {
-        name: 'Lollipop',
-        calories: 392,
-        fat: 0.2,
-        carbs: 98,
-        protein: 0,
-        iron: '2%',
-      },
-      {
-        name: 'Honeycomb',
-        calories: 408,
-        fat: 3.2,
-        carbs: 87,
-        protein: 6.5,
-        iron: '45%',
-      },
-      {
-        name: 'Donut',
-        calories: 452,
-        fat: 25.0,
-        carbs: 51,
-        protein: 4.9,
-        iron: '22%',
-      },
-      {
-        name: 'KitKat',
-        calories: 518,
-        fat: 26.0,
-        carbs: 65,
-        protein: 7,
-        iron: '6%',
-      },
-    ]
-  }),
+  components:{
+    Detail
+  },
+  data () {
+    return {
+      dialog: false,
+      loading: true,
+      itemSelected: {},
+      data:[],
+      headers: [
+        {
+          text: '#',
+          align: 'center',
+          sortable: true,
+          value: 'id',
+        },
+        {
+          text: 'Name',
+          align: 'center',
+          sortable: true,
+          value: 'name',
+        },
+        { text: 'Phone', align: 'center', value: 'phone' },
+        { text: 'Shiporders', align: 'center', value: 'shiporder' }
+      ],
+    }
+  },
+  created () {
+    this.getData();
+  },
   methods: {
-
+    async getData() {
+      const res = await fetch('http://localhost:8002/api/people');
+      const data = await res.json();
+      this.data = data;
+      this.loading = false
+    },
+    details (item) {
+      this.dialog = true
+      this.itemSelected = item
+      console.log(item)
+    }
   }
 };
 </script>
